@@ -4,7 +4,7 @@ namespace ItParkTeachersRegistration
 {
     public partial class Form1 : Form
     {
-        private DbManager dbManager = new DbManager();
+        private DbManager _dbManager = new DbManager();
 
         public Form1()
         {
@@ -23,7 +23,7 @@ namespace ItParkTeachersRegistration
             }
 
             string pass = textBoxPassword.Text;
-            if (name.Length < 6 || name.Length > 128)
+            if (pass.Length < 6 || pass.Length > 128)
             {
                 isCorrect = false;
                 MessageBox.Show("Пароль должен содержать от 6 до 128 символов");
@@ -31,17 +31,44 @@ namespace ItParkTeachersRegistration
 
             if (isCorrect)
             {
-                Teachers teachers = new Teachers();
+                Teacher teachers = new Teacher();
                 
                 teachers.Name = name;
                 teachers.InviteCode = pass;
-                
-                //нужна проверка на уникальность инвайт-кода (password)
 
-                //dbManager.TableTeachers.AddNew(teachers);
+                bool isSucces = _dbManager.TableTeachers.AddNew(teachers);
 
-                MessageBox.Show("Данные успешно добавлены");
+                if (isSucces)
+                {
+                    UpdateTeachersText();
+
+                    MessageBox.Show("Данные успешно добавлены");
+                }
+                else
+                {
+                    MessageBox.Show("Такой код уже существует, придумайте новый");
+                }
             }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            UpdateTeachersText();
+        }
+
+        private void UpdateTeachersText()
+        {
+            var teachers = _dbManager.TableTeachers.GetTeachers();
+
+            string text = "";
+
+            for (int i = 0; i < teachers.Count; i++)
+            {
+                text += $"{teachers[i].Name} ({teachers[i].InviteCode})";
+                text += "\n";
+            }
+
+            teachersText.Text = text;
         }
     }
 }

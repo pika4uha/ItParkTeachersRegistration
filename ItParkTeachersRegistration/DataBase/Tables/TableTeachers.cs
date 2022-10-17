@@ -17,30 +17,68 @@ namespace ItParkTeachersRegistration.DataBase.Tables
             _connection = connection;
         }
 
-        public void AddNew(Teachers teachers)
+        public bool AddNew(Teacher teacher)
         {
-            string sqlRequest = $"INSERT INTO Teachers (name, invite_code) VALUES ('{teachers.Name}', '{teachers.InviteCode}')";
+            if (!CheckInviteCodeUnique(teacher))
+            {
+                return false;
+            }
+
+            string sqlRequest = $"INSERT INTO Teachers (name, invite_code) VALUES ('{teacher.Name}', '{teacher.InviteCode}')";
 
             NpgsqlCommand command = new NpgsqlCommand(sqlRequest, _connection);
 
             command.ExecuteNonQuery();
+
+            return true;
         }
 
-        public Teachers GetTeacher(Teachers teachers)
+        public List<Teacher> GetTeachers()
         {
-            string sqlRequest = $"SELECT * FROM links_categories WHERE id={findId}";
+            List<Teacher> teachers = new List<Teacher>();
+
+            string sqlRequest = $"SELECT name, invite_code FROM teachers"; // $"SELECT * FROM teachers WHERE id={findId}"
 
             NpgsqlCommand command = new NpgsqlCommand(sqlRequest, _connection);
 
             NpgsqlDataReader dataReader = command.ExecuteReader();
 
-            dataReader.Read();
+            while (dataReader.Read())
+            {
+                string name = dataReader.GetString(dataReader.GetOrdinal("name"));
+                string code = dataReader.GetString(dataReader.GetOrdinal("invite_code"));
 
-            string name = dataReader.GetString(dataReader.GetOrdinal("name"));
+                teachers.Add(new Teacher(name, code));
+            }
 
             dataReader.Close();
 
             return teachers;
+        }
+
+        private bool CheckInviteCodeUnique(Teacher teacher)
+        {
+            string sqlRequest = $"SELECT invite_code FROM teachers";
+
+            NpgsqlCommand command = new NpgsqlCommand(sqlRequest, _connection);
+
+            NpgsqlDataReader dataReader = command.ExecuteReader();
+
+            while (dataReader.Read())
+            {
+                string code = dataReader.GetString(dataReader.GetOrdinal("invite_code"));
+
+                if (teacher.InviteCode == code)
+                {
+                    dataReader.Close();
+
+                    return false;
+                }
+            }
+
+            dataReader.Close();
+
+            return true;
         }
     }
 }
