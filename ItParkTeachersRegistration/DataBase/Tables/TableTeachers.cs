@@ -37,7 +37,7 @@ namespace ItParkTeachersRegistration.DataBase.Tables
         {
             List<Teacher> teachers = new List<Teacher>();
 
-            string sqlRequest = $"SELECT name, invite_code FROM teachers"; // $"SELECT * FROM teachers WHERE id={findId}"
+            string sqlRequest = $"SELECT name, invite_code FROM teachers"; // $"SELECT * FROM teachers WHERE id={findId}" 
 
             NpgsqlCommand command = new NpgsqlCommand(sqlRequest, _connection);
 
